@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 60s  # Check every minute
+  evaluation_interval: 60s
+
+# Alerting rules (we'll create this file next)
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  # Monitor Blackbox Exporter itself
+  - job_name: 'blackbox-exporter'
+    static_configs:
+      - targets: ['blackbox-exporter:9115']
+  
+  # Monitor Huduma Kenya site
+  - job_name: 'huduma-kenya'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - https://appointment.hudumakenya.go.ke  # Target to monitor
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115  # Blackbox exporter address

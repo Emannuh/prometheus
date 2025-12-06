@@ -1,0 +1,12 @@
+groups:
+  - name: uptime-alerts
+    rules:
+      - alert: HudumaKenyaDown
+        expr: probe_success{job="huduma-kenya"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Huduma Kenya Website is DOWN"
+          description: "The endpoint https://appointment.hudumakenya.go.ke is unreachable."
+

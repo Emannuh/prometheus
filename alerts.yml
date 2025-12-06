@@ -1,0 +1,32 @@
+groups:
+  - name: huduma_alerts
+    rules:
+      # Alert if site is down for 2 minutes
+      - alert: HudumaSiteDown
+        expr: probe_success{job="huduma-kenya"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Huduma Kenya portal is DOWN"
+          description: "{{ $labels.instance }} has been down for 2 minutes"
+          
+      # Alert if response is slow
+      - alert: HudumaSiteSlow
+        expr: probe_duration_seconds{job="huduma-kenya"} > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Huduma Kenya portal is slow"
+          description: "Response time is {{ $value }} seconds"
+          
+      # SSL certificate expiry warning
+      - alert: SSLCertExpiring
+        expr: probe_ssl_earliest_cert_expiry{job="huduma-kenya"} - time() < 86400 * 30  # 30 days
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "Certificate expires in {{ $value | humanizeDuration }}"
